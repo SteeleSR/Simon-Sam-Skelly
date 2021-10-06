@@ -2,14 +2,9 @@ package com.kata.SimpleWebservice;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.LocalDate;
 
 @Setter
@@ -19,7 +14,9 @@ import java.time.LocalDate;
 @Table(name = "example_user")
 public class User {
     @JsonIgnore
-    private @Id long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
     private String name;
     private int age;
     @Column(name="dateofbirth")
