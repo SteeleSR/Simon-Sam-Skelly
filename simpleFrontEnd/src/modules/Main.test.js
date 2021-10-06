@@ -7,7 +7,18 @@ import { act } from 'react-dom/test-utils';
 jest.mock('axios');
 
 const renderPage = async () => render(<Main />);
-const mockUsers = [{ name: "John Doe", age: 26, dateOfBirth: "1970-12-31" }];
+const mockUsers = [
+    {
+        name: "John Doe",
+        age: 26,
+        dateOfBirth: "1970-12-31"
+    },
+    {
+        name: "Jordan Doe",
+        age: 35,
+        dateOfBirth: "2021-01-01"
+    }
+];
 
 const mockFetchUsers = results => {
     axios.get.mockImplementation(() => Promise.resolve({
@@ -28,7 +39,10 @@ describe('Main', () => {
 
     it('shows user information on the page when we click the button', async () => {
         mockFetchUsers(mockUsers);
-        const expectedTextFromAPI = ['Name: John Doe', 'Age: 26', 'Date of birth: 1970-12-31'];
+        const expectedTextFromAPI = [
+            ['Name: Jordan Doe', 'Age: 35', 'Date of birth: 2021-01-01'],
+            ['Name: John Doe', 'Age: 26', 'Date of birth: 1970-12-31']
+        ];
 
         await act(async () => {
             await renderPage();
@@ -40,8 +54,10 @@ describe('Main', () => {
 
 
 
-        expectedTextFromAPI.forEach(content => {
-            expect(screen.getByText(content)).toBeInTheDocument();
+        expectedTextFromAPI.forEach(user => {
+            user.forEach(content => {
+                expect(screen.getByText(content)).toBeInTheDocument();
+            })
         });
     })
 });

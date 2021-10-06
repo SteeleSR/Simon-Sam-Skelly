@@ -20,16 +20,15 @@ function Main() {
                     Click this button to get user data:
                     <button onClick={getUsers}>button</button>
                 </p>
-
-                {users.length > 0 &&
+                {users.map(user => (
                     <>
                         <ul>
-                            <li>Name: {users[0].name}</li>
-                            <li>Age: {users[0].age}</li>
-                            <li>Date of birth: {users[0].dateOfBirth}</li>
+                            <li>Name: {user.name}</li>
+                            <li>Age: {user.age}</li>
+                            <li>Date of birth: {user.dateOfBirth}</li>
                         </ul>
                     </>
-                }
+                ))}
             </header>
         </div>
     )
