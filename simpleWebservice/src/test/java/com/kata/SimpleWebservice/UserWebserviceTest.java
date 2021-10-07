@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static java.util.Arrays.asList;
+import static java.util.Optional.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -43,6 +44,7 @@ public class UserWebserviceTest {
     public void respondWithCreatedUserId() throws Exception {
         User user = new User();
         user.setId(2);
+
         given(userRepository.save(any(User.class))).willReturn(user);
 
         this.mockMvc.perform(post("/createUser")
@@ -54,6 +56,11 @@ public class UserWebserviceTest {
 
     @Test
     void savedParsedUserInCreateRequest() throws Exception {
+        User user = new User();
+        user.setId(2);
+
+        given(userRepository.save(any(User.class))).willReturn(user);
+
         this.mockMvc.perform(post("/createUser")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"name\":\"Jane Doe\",\"age\":35,\"dateOfBirth\":\"1986-04-01\"}"));
@@ -62,5 +69,18 @@ public class UserWebserviceTest {
 
         verify(userRepository).save(captor.capture());
         assertEquals("Jane Doe", captor.getValue().getName());
+    }
+
+    @Test
+    void return_a_user_by_id() throws Exception {
+        // given
+        User requestedUser = new User("Fulanito", 26, "1970-12-31");
+        long id = 1L;
+        given(userRepository.findById(id)).willReturn(of(requestedUser));
+
+        // then
+        this.mockMvc.perform(get("/users/1"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"name\":\"Fulanito\",\"age\":26,\"dateOfBirth\":\"1970-12-31\"}"));
     }
 }
