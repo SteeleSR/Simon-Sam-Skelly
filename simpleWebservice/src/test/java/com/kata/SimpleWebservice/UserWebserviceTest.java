@@ -9,6 +9,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Optional;
+
 import static java.util.Arrays.asList;
 import static java.util.Optional.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -60,7 +62,6 @@ public class UserWebserviceTest {
         user.setId(2);
 
         given(userRepository.save(any(User.class))).willReturn(user);
-
         this.mockMvc.perform(post("/createUser")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"name\":\"Jane Doe\",\"age\":35,\"dateOfBirth\":\"1986-04-01\"}"));
@@ -82,5 +83,15 @@ public class UserWebserviceTest {
         this.mockMvc.perform(get("/users/1"))
                 .andExpect(status().isOk())
                 .andExpect(content().json("{\"name\":\"Fulanito\",\"age\":26,\"dateOfBirth\":\"1970-12-31\"}"));
+    }
+
+    @Test
+    void return_404_if_no_user_found() throws Exception {
+        Optional<User> notAUser = Optional.empty();
+        long id = 5L;
+        given(userRepository.findById(id)).willReturn(notAUser);
+
+        this.mockMvc.perform(get("/users/5"))
+                .andExpect(status().isNotFound());
     }
 }

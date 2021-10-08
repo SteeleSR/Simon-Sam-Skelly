@@ -4,8 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
+
+import static java.lang.String.format;
 
 @RestController
 public class UserWebservice {
@@ -29,8 +32,17 @@ public class UserWebservice {
 
     @RequestMapping("users/{id}")
     @ResponseBody
-    @ResponseStatus(HttpStatus.OK)
     public Optional<User> getUserById(@PathVariable long id) {
-        return userRepository.findById(id);
+        Optional<User> user = userRepository.findById(id);
+//        if(user == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, format("User with ID %d not found.", id));
+
+        if(user.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, format("User with ID %d not found.", id));
+        }
+
+
+
+        return user;
     }
+
 }

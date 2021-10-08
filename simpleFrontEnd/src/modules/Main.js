@@ -4,6 +4,9 @@ import axios from 'axios';
 function Main() {
 
     const [users, setUsers] = useState([]);
+    const [userId, setUserId] = useState('');
+    const [foundUser, setFoundUser] = useState(null)
+    const [error, setError] = useState('')
     const [newUser, setNewUser] = useState({
         name: "",
         age: "",
@@ -13,6 +16,19 @@ function Main() {
     const getUsers = async () => {
         const res = await axios.get(`http://localhost:8080/getUsers`);
         setUsers(res.data)
+    }
+
+    const findUserById = async (event) => {
+        event.preventDefault();
+        setError('')
+        setFoundUser('')
+
+        try {
+            const response = await axios.get(`http://localhost:8080/users/${userId}`)
+            setFoundUser(response.data)
+        } catch(error) {
+            setError(error.response.data.message)
+        }
     }
 
     async function createUser(event) {
@@ -64,6 +80,20 @@ function Main() {
                     <input type="text" name="dateOfBirth" value={newUser.dateOfBirth} onChange={updateForm} placeholder="Date of Birth"/>
                     <button type="submit">Create User</button>
             </form>
+            <form onSubmit={findUserById}>
+                <input type="number" name="id" placeholder="User ID" value={userId} onChange={event => setUserId(event.target.value)}/>
+                <button type="submit">Find user</button>
+            </form>
+            {foundUser && (
+                <div>
+                    <p>Name: {foundUser.name}</p>
+                    <p>Age: {foundUser.age}</p>
+                    <p>Date of birth: {foundUser.dateOfBirth}</p>
+                </div>
+            )}
+            {error && (
+                <p>{error}</p>
+            )}
         </div>
     )
 }

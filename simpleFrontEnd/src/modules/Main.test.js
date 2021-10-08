@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import * as axios from 'axios';
 import { act } from 'react-dom/test-utils';
+import { when } from 'jest-when'
 
 jest.mock('axios');
 
@@ -74,5 +75,84 @@ describe('Main', () => {
         expect(axios.post).toBeCalledWith('http://localhost:8080/createUser', {name: 'Jane Doe', age: 35, dateOfBirth: '2021-01-01'});
     });
 
-    const inputText = (placeholderName, value) => userEvent.type(screen.getByPlaceholderText(placeholderName), value) 
+    it('get user by ID when find user button', async () => {
+        await act(async () => {
+            await renderPage();
+        });
+
+        inputText('User ID', '1');
+
+        await act(async () => {
+            userEvent.click(screen.getByText('Find user', { selector: 'button'}));
+        });
+
+        expect(axios.get).toBeCalledWith('http://localhost:8080/users/1');
+})
+
+    it('display the requested user data if found', async () => {
+        await act(async () => {
+            await renderPage();
+        });
+
+        when(axios.get).calledWith('http://localhost:8080/users/1').mockReturnValue({ data: {
+                name: "Fulanito",
+                age: 73,
+                dateOfBirth: "1955-01-01"
+            }
+        })
+
+        inputText('User ID', '1');
+
+        await act(async () => {
+            userEvent.click(screen.getByText('Find user', { selector: 'button'}));
+        });
+
+        expect(screen.getByText('Name: Fulanito')).toBeInTheDocument();
+        expect(screen.getByText('Age: 73')).toBeInTheDocument();
+        expect(screen.getByText('Date of birth: 1955-01-01')).toBeInTheDocument();
+    })
+
+    it('not display anything id no user found', async () => {
+        await act(async () => {
+            await renderPage();
+        });
+
+        when(axios.get).calledWith('http://localhost:8080/users/1').mockReturnValue({ data: null })
+
+        inputText('User ID', '1');
+
+        await act(async () => {
+            userEvent.click(screen.getByText('Find user', { selector: 'button'}));
+        });
+
+        expect(screen.queryByText('Name:')).toBeNull()
+        expect(screen.queryByText('Age:')).toBeNull()
+        expect(screen.queryByText('Date of birth:')).toBeNull()
+    })
+
+    it('display a not found message when not found user', async () => {
+        await act(async () => {
+            await renderPage();
+        });
+
+        when(axios.get).calledWith('http://localhost:8080/users/1').mockRejectedValue({
+            response: {
+                data: {
+                    message: 'User with ID 1 not found'
+                }
+            }
+        })
+
+        inputText('User ID', '1');
+
+        await act(async () => {
+            userEvent.click(screen.getByText('Find user', { selector: 'button'}));
+        });
+
+        expect(screen.queryByText('User with ID 1 not found')).toBeInTheDocument()
+    })
+
+
+
+    const inputText = (placeholderName, value) => userEvent.type(screen.getByPlaceholderText(placeholderName), value);
 });

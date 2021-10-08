@@ -22,6 +22,8 @@ public class SimpleWebserviceApplication {
 						.allowedOrigins("http://localhost:3000", "http://frontend:3000");
 				registry.addMapping("/createUser")
 						.allowedOrigins("http://localhost:3000", "http://frontend:3000");
+				registry.addMapping("/users/{id}")
+						.allowedOrigins("http://localhost:3000", "http://frontend:3000");
 			}
 		};
 	}
