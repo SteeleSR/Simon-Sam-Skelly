@@ -34,15 +34,31 @@ public class UserWebservice {
     @ResponseBody
     public Optional<User> getUserById(@PathVariable long id) {
         Optional<User> user = userRepository.findById(id);
-//        if(user == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, format("User with ID %d not found.", id));
 
         if(user.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, format("User with ID %d not found.", id));
         }
 
-
-
         return user;
     }
 
+    @DeleteMapping("users/{id}")
+    @ResponseBody
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteUserById(@PathVariable long id) {
+        userRepository.deleteById(id);
+    }
+    
+    @PutMapping("users/{id}")
+    @ResponseBody
+    public User updateUserById(@PathVariable long id, @RequestBody User newUserDetails) {
+
+        User userToUpdate = userRepository.findById(id)
+                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, format("User with ID %d not found.", id)));
+
+        userToUpdate.setName(newUserDetails.getName());
+        userToUpdate.setAge(newUserDetails.getAge());
+        userToUpdate.setDateOfBirth(newUserDetails.getDateOfBirth());
+        return userRepository.save(userToUpdate);
+    }
 }

@@ -9,6 +9,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
 import java.util.Optional;
 
 import static java.util.Arrays.asList;
@@ -17,8 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -35,7 +35,7 @@ public class UserWebserviceTest {
     public void defaultWebserviceEndpointShouldReturnGenericMessage() throws Exception {
         User user = new User("John Doe", 26, "1970-12-31");
 
-        given(userRepository.findAll()).willReturn(asList(user));
+        given(userRepository.findAll()).willReturn(List.of(user));
 
         this.mockMvc.perform(get("/getUsers"))
                 .andExpect(status().isOk())
@@ -93,5 +93,31 @@ public class UserWebserviceTest {
 
         this.mockMvc.perform(get("/users/5"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void delete_user_by_id() throws Exception {
+        long id = 10;
+
+        this.mockMvc.perform(delete("/users/10"))
+                .andExpect(status().isNoContent());
+
+        verify(userRepository).deleteById(id);
+    }
+
+    @Test
+    void update_user_by_id() throws Exception {
+        User user = new User("Bob Geldof", 70, "1950-12-31");
+        long id = 5L;
+
+        given(userRepository.findById(id)).willReturn(of(user));
+        given(userRepository.save(user)).willReturn(user);
+
+        this.mockMvc.perform(put("/users/5")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"Robert Geldof\",\"age\":50,\"dateOfBirth\":\"1970-12-31\"}"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"name\":\"Robert Geldof\",\"age\":50,\"dateOfBirth\":\"1970-12-31\"}"));
+
     }
 }
