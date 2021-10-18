@@ -1,4 +1,4 @@
-import { Main } from './Main'
+    import { Main } from './Main'
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import * as axios from 'axios';
@@ -73,6 +73,24 @@ describe('Main', () => {
         });
 
         expect(axios.post).toBeCalledWith('http://localhost:8080/createUser', {name: 'Jane Doe', age: 35, dateOfBirth: '2021-01-01'});
+    });
+
+    it('perform update user request when update user button is clicked', async() => {
+        await act(async () => {
+            await renderPage();
+        });
+
+        inputText('ID to update', '5');
+        inputText('Updated Name', 'Updated Name');
+        inputText('Updated Age', '52');
+        inputText('Updated Date of Birth', '1958-10-09');
+
+        await act(async () => {
+            userEvent.click(screen.getByText('Update User', { selector: 'button' }));
+        });
+
+        expect(axios.put).toBeCalledWith('http://localhost:8080/users/5', {name: 'Updated Name', age: 52, dateOfBirth: '1958-10-09'});
+        // expect(screen.getByText("User successfully updated.")).toBeInTheDocument();
     });
 
     it('get user by ID when find user button', async () => {
@@ -152,7 +170,19 @@ describe('Main', () => {
         expect(screen.queryByText('User with ID 1 not found')).toBeInTheDocument()
     })
 
+    it('delete a requested user by ID', async () => {
+        await act(async () => {
+            await renderPage();
+        });
 
+        inputText('User ID to delete', '6');
+
+        await act(async () => {
+            userEvent.click(screen.getByText('Delete user', { selector: 'button'}));
+        });
+
+        expect(axios.delete).toBeCalledWith('http://localhost:8080/users/6');
+    })
 
     const inputText = (placeholderName, value) => userEvent.type(screen.getByPlaceholderText(placeholderName), value);
 });

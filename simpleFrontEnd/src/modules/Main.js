@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import axios from 'axios';
+import UpdateForm from './UpdateForm';
 
 function Main() {
 
     const [users, setUsers] = useState([]);
     const [userId, setUserId] = useState('');
+    const [deleteID, setDeleteID] = useState('');
     const [foundUser, setFoundUser] = useState(null)
     const [error, setError] = useState('')
     const [newUser, setNewUser] = useState({
@@ -16,6 +18,12 @@ function Main() {
     const getUsers = async () => {
         const res = await axios.get(`http://localhost:8080/getUsers`);
         setUsers(res.data)
+    }
+
+    const deleteUser = async (event) => {
+        event.preventDefault();
+        await axios.delete(`http://localhost:8080/users/${deleteID}`);
+        setDeleteID('');
     }
 
     const findUserById = async (event) => {
@@ -75,10 +83,10 @@ function Main() {
                 ))}
             </header>
             <form onSubmit={createUser}>
-                    <input type="text" name="name" value={newUser.name} onChange={updateForm} placeholder="Name"/>
-                    <input type="number" name="age" value={newUser.age} onChange={updateForm} placeholder="Age"/>
-                    <input type="text" name="dateOfBirth" value={newUser.dateOfBirth} onChange={updateForm} placeholder="Date of Birth"/>
-                    <button type="submit">Create User</button>
+                <input type="text" name="name" value={newUser.name} onChange={updateForm} placeholder="Name"/>
+                <input type="number" name="age" value={newUser.age} onChange={updateForm} placeholder="Age"/>
+                <input type="text" name="dateOfBirth" value={newUser.dateOfBirth} onChange={updateForm} placeholder="Date of Birth"/>
+                <button type="submit">Create User</button>
             </form>
             <form onSubmit={findUserById}>
                 <input type="number" name="id" placeholder="User ID" value={userId} onChange={event => setUserId(event.target.value)}/>
@@ -94,6 +102,11 @@ function Main() {
             {error && (
                 <p>{error}</p>
             )}
+            <UpdateForm />
+            <form onSubmit={deleteUser}>
+                <input type="number" name="id" placeholder="User ID to delete" value={deleteID} onChange={event => setDeleteID(event.target.value)}/>
+                <button type="submit">Delete user</button>
+            </form>
         </div>
     )
 }
